@@ -58,11 +58,23 @@ function parseItem(item, model, condition) {
     location: item.MetroName ?? null,
     url: listingUrl(model, vin, condition),
     image_url: compositorImage(model, item.OptionCodeList ?? null),
+    _photos: (item.VehiclePhotos || [])
+      .map(p => p.imageUrl)
+      .filter(Boolean),
   }
 }
 
+function upsertPhotos(db, listingId, photos) {
+  if (!photos || photos.length === 0) return
+  db.prepare('DELETE FROM listing_photos WHERE listing_id = ?').run(listingId)
+  const insert = db.prepare(
+    'INSERT INTO listing_photos (listing_id, url, sort_order) VALUES (?, ?, ?)'
+  )
+  photos.forEach((url, i) => insert.run(listingId, url, i))
+}
+
 function upsertListings(db, listings) {
-  const now = new Date().toISOString()
+  const now = new Date().toISOString().replace('T', ' ').replace('Z', '')
 
   const selectPrices = db.prepare(
     'SELECT source, external_id, id, price_eur FROM listings WHERE source = ? AND external_id = ?'
@@ -102,9 +114,11 @@ function upsertListings(db, listings) {
       const prior = selectPrices.get(row.source, row.external_id)
       upsert.run({ ...row, scraped_at: now })
 
+      const { id } = selectId.get(row.source, row.external_id)
+      upsertPhotos(db, id, row._photos)
+
       const priceChanged = !prior || prior.price_eur !== row.price_eur
       if (priceChanged) {
-        const { id } = selectId.get(row.source, row.external_id)
         insertHistory.run({ listing_id: id, price_eur: row.price_eur, recorded_at: now })
       }
     }

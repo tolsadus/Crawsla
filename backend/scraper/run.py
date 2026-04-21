@@ -195,7 +195,7 @@ def tesla(
     import subprocess
 
     init_db()
-    script = Path(__file__).resolve().parent.parent / "tesla_scrape.js"
+    script = Path(__file__).resolve().parent / "tesla_scrape.js"
     cmd = ["node", str(script)] + models.split(",")
     result = subprocess.run(cmd, capture_output=not debug, text=True)
     if result.returncode != 0:
