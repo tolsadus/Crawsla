@@ -7,6 +7,7 @@ Usage:
 from __future__ import annotations
 
 import asyncio
+import re
 from dataclasses import asdict
 from datetime import UTC, datetime
 from pathlib import Path
@@ -20,11 +21,31 @@ from app.models import Listing, PriceHistory
 
 app = typer.Typer(help="Crawsla scraper runner")
 
+_MODEL_RE = re.compile(r'\bModel[-\s]+([3SXY])\b', re.IGNORECASE)
+
+def _normalize_model(value: str | None) -> str | None:
+    if not value:
+        return value
+    normalized = _MODEL_RE.sub(lambda m: f"Model {m.group(1).upper()}", value)
+    # Handle all-caps variants like "MODEL Y" → "Model Y"
+    _CAPS_RE = re.compile(r'^MODEL\s+([3SXY])$', re.IGNORECASE)
+    m = _CAPS_RE.match(normalized.strip())
+    if m:
+        normalized = f"Model {m.group(1).upper()}"
+    return normalized
+
+
+def _normalize_row(row: dict) -> dict:
+    row = dict(row)
+    row["model"] = _normalize_model(row.get("model"))
+    return row
+
 
 def _upsert(session, rows: list[dict]) -> int:
     if not rows:
         return 0
 
+    rows = [_normalize_row(r) for r in rows]
     keys = [(r["source"], r["external_id"]) for r in rows]
     prior = {
         (r.source, r.external_id): r.price_eur

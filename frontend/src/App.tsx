@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { fetchListings, fetchStats } from "./api";
 import ListingDetail from "./ListingDetail";
+import Trends from "./Trends";
 import type { Listing, ListingFilters, SortBy, SortDir } from "./types";
 
 const MODELS = ["Model S", "Model 3", "Model X", "Model Y"] as const;
@@ -60,6 +61,12 @@ function parseListingId(hash: string): number | null {
   return m ? Number(m[1]) : null;
 }
 
+function parsePage(hash: string): "listings" | "trends" | "detail" {
+  if (hash.startsWith("#/listing/")) return "detail";
+  if (hash === "#/trends") return "trends";
+  return "listings";
+}
+
 function RangeSlider({
   label,
   min,
@@ -111,6 +118,7 @@ function RangeSlider({
 
 export default function App() {
   const hash = useHashRoute();
+  const page = parsePage(hash);
   const detailId = parseListingId(hash);
 
   const LIMIT = 50;
@@ -149,7 +157,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (detailId !== null) return;
+    if (page !== "listings") return;
     setLoading(true);
     setError(null);
     setOffset(0);
@@ -183,13 +191,21 @@ export default function App() {
     <div className="app">
       <div className="topbar">
         <a className="brand" href="#">Crawsla</a>
-        <div className="topbar-meta">{detailId !== null ? "Detail" : `${totalCount ?? "…"} inventory`}</div>
+        <nav className="topbar-nav">
+          <a className={`nav-link ${page === "listings" || page === "detail" ? "active" : ""}`} href="#">Listings</a>
+          <a className={`nav-link ${page === "trends" ? "active" : ""}`} href="#/trends">Trends</a>
+        </nav>
+        <div className="topbar-meta">
+          {page === "detail" ? "Detail" : page === "trends" ? "Trends" : `${totalCount ?? "…"} inventory`}
+        </div>
       </div>
 
-      {detailId !== null ? (
+      {page === "detail" ? (
         <div className="detail-wrap">
-          <ListingDetail id={detailId} />
+          <ListingDetail id={detailId!} />
         </div>
+      ) : page === "trends" ? (
+        <Trends />
       ) : (
         <>
           <section className="hero">

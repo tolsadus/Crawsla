@@ -4,7 +4,7 @@ const createTeslaInventory = require('tesla-inventory')
 const Database = require('better-sqlite3')
 const path = require('path')
 
-const DB_PATH = path.join(__dirname, 'crawsla.db')
+const DB_PATH = path.join(__dirname, '..', 'crawsla.db')
 const MODELS = ['m3', 'my', 'ms', 'mx']
 const CONDITIONS = ['new', 'used']
 const MODEL_NAMES = { m3: 'Model 3', my: 'Model Y', ms: 'Model S', mx: 'Model X' }
@@ -27,7 +27,7 @@ function compositorImage(model, optionCodeList) {
 }
 
 function listingUrl(model, vin, condition) {
-  return `https://www.tesla.com/fr_FR/${model}/order/${vin}?titleStatus=${condition}`
+  return `https://www.tesla.com/fr_FR/${model}/order/${vin}?titleStatus=${condition}&referral=maxime716843`
 }
 
 function parseItem(item, model, condition) {

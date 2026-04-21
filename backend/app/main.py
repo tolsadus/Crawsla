@@ -123,6 +123,41 @@ def get_price_history(listing_id: int, db: Annotated[Session, Depends(get_db)]):
     return [{"price_eur": r.price_eur, "recorded_at": r.recorded_at} for r in rows]
 
 
+@app.get("/api/trends")
+def trends(db: Annotated[Session, Depends(get_db)]):
+    from sqlalchemy import func
+
+    stmt = (
+        select(
+            func.strftime("%Y-%m-%d", PriceHistory.recorded_at).label("date"),
+            Listing.model,
+            func.round(func.avg(PriceHistory.price_eur)).label("avg_price"),
+            func.min(PriceHistory.price_eur).label("min_price"),
+            func.max(PriceHistory.price_eur).label("max_price"),
+            func.count(PriceHistory.id).label("count"),
+        )
+        .join(Listing, Listing.id == PriceHistory.listing_id)
+        .where(PriceHistory.price_eur.isnot(None))
+        .group_by(
+            func.strftime("%Y-%m-%d", PriceHistory.recorded_at),
+            Listing.model,
+        )
+        .order_by(func.strftime("%Y-%m-%d", PriceHistory.recorded_at))
+    )
+    rows = db.execute(stmt).all()
+    return [
+        {
+            "date": r.date,
+            "model": r.model,
+            "avg_price": int(r.avg_price) if r.avg_price is not None else None,
+            "min_price": r.min_price,
+            "max_price": r.max_price,
+            "count": r.count,
+        }
+        for r in rows
+    ]
+
+
 @app.get("/api/stats")
 def stats(db: Annotated[Session, Depends(get_db)]):
     from sqlalchemy import func

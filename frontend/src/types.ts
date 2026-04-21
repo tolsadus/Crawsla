@@ -25,6 +25,15 @@ export type PricePoint = {
 export type SortBy = "scraped_at" | "mileage_km" | "year" | "price";
 export type SortDir = "asc" | "desc";
 
+export type TrendPoint = {
+  date: string;
+  model: string | null;
+  avg_price: number | null;
+  min_price: number | null;
+  max_price: number | null;
+  count: number;
+};
+
 export type ListingFilters = {
   model?: string;
   min_price?: number;

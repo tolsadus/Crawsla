@@ -47,6 +47,23 @@ html, body {
   text-transform: uppercase;
   color: var(--text);
 }
+.topbar-nav {
+  display: flex;
+  gap: 0.25rem;
+}
+.nav-link {
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  color: var(--text-dim);
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+.nav-link:hover { background: var(--chip-bg); color: var(--text); }
+.nav-link.active { background: var(--chip-bg); color: var(--text); font-weight: 600; }
+
 .topbar-meta {
   color: var(--text-dim);
   font-size: 0.8rem;
@@ -532,6 +549,105 @@ code {
 
 @media (max-width: 600px) {
   .topbar { padding: 0.85rem 1rem; }
+  .topbar-nav { display: none; }
   .hero { padding: 2.5rem 1rem 1.5rem; }
   .hero h1 { font-size: 2rem; }
+}
+
+/* Trends page */
+.trends-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 2rem 4rem;
+}
+
+.trend-chart-wrap {
+  background: var(--surface);
+  border-radius: 20px;
+  padding: 1.75rem;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  margin-bottom: 2rem;
+}
+
+.trend-legend {
+  display: flex;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+.trend-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-dim);
+}
+.trend-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.trend-chart {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.trend-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-mute);
+  font-size: 0.9rem;
+}
+
+.trend-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.trend-card {
+  background: var(--surface);
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+.trend-card-accent {
+  width: 4px;
+  flex-shrink: 0;
+}
+.trend-card-body {
+  padding: 1.1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.trend-card-model {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-mute);
+}
+.trend-card-price {
+  margin: 0.2rem 0 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+.trend-card-meta {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
+.trend-card-count {
+  margin: 0 0 0.4rem;
+  font-size: 0.75rem;
+  color: var(--text-mute);
 }

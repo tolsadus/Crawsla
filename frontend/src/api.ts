@@ -1,4 +1,4 @@
-import type { Listing, ListingFilters, PricePoint } from "./types";
+import type { Listing, ListingFilters, PricePoint, TrendPoint } from "./types";
 
 export async function fetchListings(filters: ListingFilters = {}): Promise<Listing[]> {
   const params = new URLSearchParams();
@@ -32,6 +32,12 @@ export async function fetchStats(): Promise<{ total: number }> {
 
 export async function fetchPriceHistory(id: number): Promise<PricePoint[]> {
   const res = await fetch(`/api/listings/${id}/price-history`);
+  if (!res.ok) throw new Error(`API error ${res.status}`);
+  return res.json();
+}
+
+export async function fetchTrends(): Promise<TrendPoint[]> {
+  const res = await fetch("/api/trends");
   if (!res.ok) throw new Error(`API error ${res.status}`);
   return res.json();
 }
