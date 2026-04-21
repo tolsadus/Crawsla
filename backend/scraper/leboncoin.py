@@ -254,7 +254,7 @@ window.chrome = {runtime: {}};
 async def scrape(search_url: str = SEARCH_URL, pages: int = 1, debug: bool = False) -> list[ScrapedListing]:
     all_results: list[ScrapedListing] = []
     async with async_playwright() as pw:
-        browser = await pw.chromium.launch(headless=True, args=_STEALTH_ARGS)
+        browser = await pw.chromium.launch(headless=not debug, slow_mo=150 if debug else 0, args=_STEALTH_ARGS)
         try:
             for page_num in range(1, pages + 1):
                 if page_num == 1:
@@ -268,6 +268,9 @@ async def scrape(search_url: str = SEARCH_URL, pages: int = 1, debug: bool = Fal
                 all_results.extend(results)
                 if page_num < pages:
                     await asyncio.sleep(random.uniform(3, 6))
+            if debug:
+                print("  [debug] browser staying open for 15s — inspect the window now")
+                await asyncio.sleep(15)
         finally:
             await browser.close()
     return all_results
