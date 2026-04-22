@@ -1,13 +1,15 @@
 'use strict'
 
-const createTeslaInventory = require('tesla-inventory')
-const Database = require('better-sqlite3')
-const path = require('path')
+require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') })
 
-const DB_PATH = path.join(__dirname, '..', 'crawsla.db')
+const createTeslaInventory = require('tesla-inventory')
+const { Pool } = require('pg')
+
 const MODELS = ['m3', 'my', 'ms', 'mx']
 const CONDITIONS = ['new', 'used']
 const MODEL_NAMES = { m3: 'Model 3', my: 'Model Y', ms: 'Model S', mx: 'Model X' }
+
+const pool = new Pool({ connectionString: process.env.DATABASE_URL })
 
 const fetcher = url => fetch(url).then(res => res.text())
 const teslaInventory = createTeslaInventory(fetcher)
@@ -58,84 +60,83 @@ function parseItem(item, model, condition) {
     location: item.MetroName ?? null,
     url: listingUrl(model, vin, condition),
     image_url: compositorImage(model, item.OptionCodeList ?? null),
-    _photos: (item.VehiclePhotos || [])
-      .map(p => p.imageUrl)
-      .filter(Boolean),
+    _photos: (item.VehiclePhotos || []).map(p => p.imageUrl).filter(Boolean),
   }
 }
 
-function upsertPhotos(db, listingId, photos) {
+async function upsertPhotos(client, listingId, photos) {
   if (!photos || photos.length === 0) return
-  db.prepare('DELETE FROM listing_photos WHERE listing_id = ?').run(listingId)
-  const insert = db.prepare(
-    'INSERT INTO listing_photos (listing_id, url, sort_order) VALUES (?, ?, ?)'
-  )
-  photos.forEach((url, i) => insert.run(listingId, url, i))
+  await client.query('DELETE FROM listing_photos WHERE listing_id = $1', [listingId])
+  for (let i = 0; i < photos.length; i++) {
+    await client.query(
+      'INSERT INTO listing_photos (listing_id, url, sort_order) VALUES ($1, $2, $3)',
+      [listingId, photos[i], i]
+    )
+  }
 }
 
-function upsertListings(db, listings) {
-  const now = new Date().toISOString().replace('T', ' ').replace('Z', '')
+async function upsertListings(listings) {
+  const client = await pool.connect()
+  const now = new Date().toISOString()
 
-  const selectPrices = db.prepare(
-    'SELECT source, external_id, id, price_eur FROM listings WHERE source = ? AND external_id = ?'
-  )
+  try {
+    await client.query('BEGIN')
 
-  const upsert = db.prepare(`
-    INSERT INTO listings
-      (source, external_id, title, make, model, version, price_eur, year, mileage_km,
-       fuel, gearbox, location, url, image_url, scraped_at)
-    VALUES
-      (@source, @external_id, @title, @make, @model, @version, @price_eur, @year, @mileage_km,
-       @fuel, @gearbox, @location, @url, @image_url, @scraped_at)
-    ON CONFLICT(source, external_id) DO UPDATE SET
-      title      = excluded.title,
-      price_eur  = excluded.price_eur,
-      year       = excluded.year,
-      mileage_km = excluded.mileage_km,
-      fuel       = excluded.fuel,
-      gearbox    = excluded.gearbox,
-      location   = excluded.location,
-      url        = excluded.url,
-      image_url  = excluded.image_url,
-      scraped_at = excluded.scraped_at
-  `)
+    for (const row of listings) {
+      const priorRes = await client.query(
+        'SELECT id, price_eur FROM listings WHERE source = $1 AND external_id = $2',
+        [row.source, row.external_id]
+      )
+      const prior = priorRes.rows[0] ?? null
 
-  const insertHistory = db.prepare(`
-    INSERT INTO price_history (listing_id, price_eur, recorded_at)
-    VALUES (@listing_id, @price_eur, @recorded_at)
-  `)
+      const upsertRes = await client.query(
+        `INSERT INTO listings
+          (source, external_id, title, make, model, version, price_eur, year, mileage_km,
+           fuel, gearbox, location, url, image_url, scraped_at)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
+         ON CONFLICT (source, external_id) DO UPDATE SET
+           title      = EXCLUDED.title,
+           price_eur  = EXCLUDED.price_eur,
+           year       = EXCLUDED.year,
+           mileage_km = EXCLUDED.mileage_km,
+           fuel       = EXCLUDED.fuel,
+           gearbox    = EXCLUDED.gearbox,
+           location   = EXCLUDED.location,
+           url        = EXCLUDED.url,
+           image_url  = EXCLUDED.image_url,
+           scraped_at = EXCLUDED.scraped_at
+         RETURNING id`,
+        [
+          row.source, row.external_id, row.title, row.make, row.model, row.version,
+          row.price_eur, row.year, row.mileage_km, row.fuel, row.gearbox,
+          row.location, row.url, row.image_url, now,
+        ]
+      )
 
-  const selectId = db.prepare(
-    'SELECT id FROM listings WHERE source = ? AND external_id = ?'
-  )
-
-  const run = db.transaction(rows => {
-    for (const row of rows) {
-      const prior = selectPrices.get(row.source, row.external_id)
-      upsert.run({ ...row, scraped_at: now })
-
-      const { id } = selectId.get(row.source, row.external_id)
-      upsertPhotos(db, id, row._photos)
+      const id = upsertRes.rows[0].id
+      await upsertPhotos(client, id, row._photos)
 
       const priceChanged = !prior || prior.price_eur !== row.price_eur
       if (priceChanged) {
-        insertHistory.run({ listing_id: id, price_eur: row.price_eur, recorded_at: now })
+        await client.query(
+          'INSERT INTO price_history (listing_id, price_eur, recorded_at) VALUES ($1, $2, $3)',
+          [id, row.price_eur, now]
+        )
       }
     }
-  })
 
-  run(listings)
+    await client.query('COMMIT')
+  } catch (err) {
+    await client.query('ROLLBACK')
+    throw err
+  } finally {
+    client.release()
+  }
 }
 
 async function main() {
   const args = process.argv.slice(2)
   const models = args.length ? args : MODELS
-  const db = new Database(DB_PATH)
-
-  db.pragma('journal_mode = WAL')
-  db.pragma('synchronous = NORMAL')
-  db.pragma('foreign_keys = ON')
-
   let total = 0
 
   for (const model of models) {
@@ -145,11 +146,8 @@ async function main() {
         const results = await teslaInventory('fr', { model, condition })
         console.log(`  -> ${results.length} results`)
 
-        const listings = results
-          .map(item => parseItem(item, model, condition))
-          .filter(Boolean)
-
-        upsertListings(db, listings)
+        const listings = results.map(item => parseItem(item, model, condition)).filter(Boolean)
+        await upsertListings(listings)
         total += listings.length
         console.log(`  -> upserted ${listings.length} listings`)
       } catch (err) {
@@ -158,7 +156,7 @@ async function main() {
     }
   }
 
-  db.close()
+  await pool.end()
   console.log(`\nDone. Total upserted: ${total}`)
 }
 

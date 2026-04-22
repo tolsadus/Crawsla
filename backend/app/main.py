@@ -127,9 +127,10 @@ def get_price_history(listing_id: int, db: Annotated[Session, Depends(get_db)]):
 def trends(db: Annotated[Session, Depends(get_db)]):
     from sqlalchemy import func
 
+    date_expr = func.to_char(PriceHistory.recorded_at, "YYYY-MM-DD")
     stmt = (
         select(
-            func.strftime("%Y-%m-%d", PriceHistory.recorded_at).label("date"),
+            date_expr.label("date"),
             Listing.model,
             func.round(func.avg(PriceHistory.price_eur)).label("avg_price"),
             func.min(PriceHistory.price_eur).label("min_price"),
@@ -138,11 +139,8 @@ def trends(db: Annotated[Session, Depends(get_db)]):
         )
         .join(Listing, Listing.id == PriceHistory.listing_id)
         .where(PriceHistory.price_eur.isnot(None))
-        .group_by(
-            func.strftime("%Y-%m-%d", PriceHistory.recorded_at),
-            Listing.model,
-        )
-        .order_by(func.strftime("%Y-%m-%d", PriceHistory.recorded_at))
+        .group_by(date_expr, Listing.model)
+        .order_by(date_expr)
     )
     rows = db.execute(stmt).all()
     return [

@@ -1,4 +1,4 @@
-"""CLI entry point: scrape a source and persist to SQLite.
+"""CLI entry point: scrape a source and persist to Supabase.
 
 Usage:
     python3 -m scraper.run lacentrale --pages 2
@@ -14,7 +14,7 @@ from pathlib import Path
 
 import typer
 from sqlalchemy import select, tuple_
-from sqlalchemy.dialects.sqlite import insert
+from sqlalchemy.dialects.postgresql import insert
 
 from app.db import SessionLocal, init_db
 from app.models import Listing, PriceHistory
@@ -110,7 +110,7 @@ def lacentrale(
     url: str = typer.Option(None, help="Override search URL"),
     debug: bool = typer.Option(False, help="Run headful, save screenshot and HTML to backend/debug/"),
 ):
-    """Scrape LaCentrale search results and store in SQLite."""
+    """Scrape LaCentrale search results and store in Supabase."""
     from scraper.lacentrale import SEARCH_URL, scrape
 
     init_db()
@@ -131,7 +131,7 @@ def leboncoin(
     url: str = typer.Option(None, help="Override search URL"),
     debug: bool = typer.Option(False, help="Run headful, dump screenshot + __NEXT_DATA__ to backend/debug/"),
 ):
-    """Scrape Leboncoin search results and store in SQLite."""
+    """Scrape Leboncoin search results and store in Supabase."""
     from scraper.leboncoin import SEARCH_URL, scrape
 
     init_db()
@@ -152,7 +152,7 @@ def gmecars(
     url: str = typer.Option(None, help="Override search URL"),
     debug: bool = typer.Option(False, help="Dump fetched HTML to backend/debug/"),
 ):
-    """Scrape GMECars search results and store in SQLite."""
+    """Scrape GMECars search results and store in Supabase."""
     from scraper.gmecars import SEARCH_URL, scrape
 
     init_db()
@@ -173,7 +173,7 @@ def mobile_de(
     url: str = typer.Option(None, help="Override search URL"),
     debug: bool = typer.Option(False, help="Run headful, dump screenshot + API payloads to backend/debug/"),
 ):
-    """Scrape mobile.de search results and store in SQLite."""
+    """Scrape mobile.de search results and store in Supabase."""
     from scraper.mobile_de import SEARCH_URL, scrape
 
     init_db()
@@ -193,7 +193,7 @@ def capcar(
     pages: int = typer.Option(10, help="Max pages to fetch from Algolia (50 hits/page)"),
     debug: bool = typer.Option(False, help="Dump raw Algolia JSON to backend/debug/"),
 ):
-    """Scrape CapCar Tesla listings via Algolia and store in SQLite."""
+    """Scrape CapCar Tesla listings via Algolia and store in Supabase."""
     from scraper.capcar import scrape
 
     init_db()
@@ -212,7 +212,7 @@ def tesla(
     models: str = typer.Option("m3,my,ms,mx", help="Comma-separated model codes to fetch (m3,my,ms,mx)"),
     debug: bool = typer.Option(False, help="Print raw Node output"),
 ):
-    """Fetch Tesla inventory via tesla-inventory npm package and store in SQLite."""
+    """Fetch Tesla inventory via tesla-inventory npm package and store in Supabase."""
     import subprocess
 
     init_db()
