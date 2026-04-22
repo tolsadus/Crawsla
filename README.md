@@ -18,13 +18,13 @@ Aggregated Tesla used-car listings scraped from multiple French and European mar
 | [Leboncoin](https://www.leboncoin.fr) | Playwright — intercepts internal JSON API (Datadome protected) |
 | [GMECars](https://www.gmecars.fr) | HTTP + HTML parsing (no browser needed) |
 | [CapCar](https://www.capcar.fr) | Algolia API (no browser needed) |
-| [Tesla](https://www.tesla.com/fr_FR/inventory) | `tesla-inventory` npm package — fetches new and used inventory |
+| [Tesla FR](https://www.tesla.com/fr_FR/inventory) | `tesla-inventory` npm package — fetches new and used inventory |
 
 ## Stack
 
-- **Backend** — Python 3.12, FastAPI, SQLAlchemy, SQLite, Playwright
-- **Frontend** — React 18, TypeScript, Vite 7
-- **Tesla scraper** — Node.js (`tesla-inventory` npm package)
+- **Backend** — Python 3.12, FastAPI, Supabase, Playwright
+- **Frontend** — React 19, TypeScript, Vite 7
+- **Tesla scraper** — Node.js ([`tesla-inventory`](https://www.npmjs.com/package/tesla-inventory) npm package)
 
 ## Setup
 
