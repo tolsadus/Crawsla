@@ -1,5 +1,20 @@
 * { box-sizing: border-box; }
 
+.version-badge {
+  position: fixed;
+  bottom: 12px;
+  right: 14px;
+  font-size: 11px;
+  font-family: ui-monospace, monospace;
+  color: var(--text-mute);
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 8px;
+  pointer-events: none;
+  z-index: 1000;
+}
+
 :root {
   --bg: #f4f4f4;
   --bg-elev: #ffffff;

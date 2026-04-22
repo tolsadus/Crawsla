@@ -1,3 +1,6 @@
+declare const __GIT_BRANCH__: string;
+declare const __GIT_COMMIT__: string;
+
 import { useEffect, useRef, useState } from "react";
 import { fetchListings, fetchStats } from "./api";
 import ListingDetail from "./ListingDetail";
@@ -319,6 +322,10 @@ export default function App() {
           </div>
         </>
       )}
+
+      <div className="version-badge">
+        {__GIT_BRANCH__}@{__GIT_COMMIT__}
+      </div>
     </div>
   );
 }
