@@ -4,12 +4,9 @@ version = "0.1.0"
 description = "Crawsla backend — scraper + API for car listings"
 requires-python = ">=3.11"
 dependencies = [
-    "fastapi>=0.115",
-    "uvicorn[standard]>=0.32",
     "sqlalchemy>=2.0",
-    "psycopg2-binary>=2.9",
+    "pg8000>=1.31",
     "python-dotenv>=1.0",
-    "pydantic>=2.9",
     "playwright>=1.48",
     "typer>=0.13",
 ]
