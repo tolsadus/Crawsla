@@ -24,6 +24,13 @@ function inferSoh(row) {
   return parseFloat(m[1].replace(',', '.'))
 }
 
+function inferAutopilot(row) {
+  const hay = `${row.title ?? ''} ${row.version ?? ''}`.toLowerCase()
+  if (/\bfsd\b|full.self.driv/.test(hay)) return 'FSD'
+  if (/\beap\b|enhanced.autopilot/.test(hay)) return 'EAP'
+  return null
+}
+
 function inferDrivetrain(row) {
   const hay = `${row.title ?? ''} ${row.version ?? ''}`.toLowerCase()
   if (/plaid/.test(hay)) return 'Plaid'
@@ -101,7 +108,7 @@ async function upsertBatch(client, rows, now) {
       rows.map(r => r.horse_power ?? null),
       rows.map(r => r.doors ?? null),
       rows.map(r => r.seats ?? null),
-      rows.map(r => r.autopilot ?? null),
+      rows.map(r => r.autopilot ?? inferAutopilot(r)),
     ]
   )
 

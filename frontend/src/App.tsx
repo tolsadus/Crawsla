@@ -246,7 +246,7 @@ export default function App() {
 
       {page === "detail" ? (
         <div className="detail-wrap">
-          <ListingDetail id={detailId!} />
+          <ListingDetail id={detailId!} isSaved={isSaved(detailId!)} onToggle={() => { if (!user) { setShowAuthMenu(true); return; } toggle(detailId!); }} />
         </div>
       ) : page === "trends" ? (
         <Trends />

@@ -121,7 +121,7 @@ function Carousel({ photos, fallback }: { photos: string[]; fallback: string | n
   );
 }
 
-export default function ListingDetail({ id }: { id: number }) {
+export default function ListingDetail({ id, isSaved, onToggle }: { id: number; isSaved?: boolean; onToggle?: () => void }) {
   const [listing, setListing] = useState<Listing | null>(null);
   const [history, setHistory] = useState<PricePoint[]>([]);
   const [photos, setPhotos] = useState<string[]>([]);
@@ -177,6 +177,11 @@ export default function ListingDetail({ id }: { id: number }) {
           <p className="scraped-at">Crawled {formatDate(listing.scraped_at)}</p>
           <div className="cta-row">
             <a className="btn btn-primary" href={listing.url} target="_blank" rel="noreferrer">View on {listing.source}</a>
+            {onToggle && (
+              <button className={`btn btn-secondary${isSaved ? " active" : ""}`} onClick={onToggle}>
+                {isSaved ? "✕ Remove" : "🔖 Save"}
+              </button>
+            )}
           </div>
         </div>
       </div>
