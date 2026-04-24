@@ -143,12 +143,6 @@ export default function Compare({ ids, onRemove, onClear }: { ids: number[]; onR
   if (ids.length === 0) {
     return (
       <div className="compare-page">
-        <div className="page-header">
-          <div>
-            <h2 className="dropped-title">{t("compare_title")}</h2>
-            <p className="dropped-subtitle">{t("compare_subtitle")}</p>
-          </div>
-        </div>
         <p className="state">{t("compare_empty")}</p>
       </div>
     );
@@ -162,7 +156,6 @@ export default function Compare({ ids, onRemove, onClear }: { ids: number[]; onR
       <div className="page-header">
         <div>
           <h2 className="dropped-title">{t("compare_title")}</h2>
-          <p className="dropped-subtitle">{t("compare_subtitle")}</p>
         </div>
         <button className="btn btn-secondary" onClick={onClear}>{t("compare_clear")}</button>
       </div>
