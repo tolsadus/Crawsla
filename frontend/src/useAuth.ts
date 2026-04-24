@@ -26,9 +26,23 @@ export function useAuth() {
     });
   }
 
+  function signInWithGithub() {
+    supabase.auth.signInWithOAuth({
+      provider: "github",
+      options: { redirectTo: window.location.origin + window.location.pathname },
+    });
+  }
+
+  function signInWithTwitter() {
+    supabase.auth.signInWithOAuth({
+      provider: "twitter",
+      options: { redirectTo: window.location.origin + window.location.pathname },
+    });
+  }
+
   function signOut() {
     supabase.auth.signOut();
   }
 
-  return { user, loading, signInWithGoogle, signOut };
+  return { user, loading, signInWithGoogle, signInWithGithub, signInWithTwitter, signOut };
 }

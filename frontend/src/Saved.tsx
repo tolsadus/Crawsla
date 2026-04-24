@@ -19,7 +19,7 @@ function formatDate(iso: string): string {
   return new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(iso));
 }
 
-export default function Saved() {
+export default function Saved({ onSignIn }: { onSignIn?: () => void }) {
   const { user } = useAuth();
   const { saved, toggle } = useSaved(user);
   const [listings, setListings] = useState<Listing[]>([]);
@@ -27,13 +27,23 @@ export default function Saved() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (saved.size === 0) { setListings([]); return; }
+    if (!user || saved.size === 0) { setListings([]); return; }
     setLoading(true);
     fetchListingsByIds([...saved])
       .then(setListings)
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
-  }, [saved]);
+  }, [saved, user]);
+
+  if (!user) {
+    return (
+      <div className="auth-gate">
+        <div className="auth-gate-icon">🔖</div>
+        <h2 className="auth-gate-title">Sign in to use your watchlist</h2>
+        <p className="auth-gate-sub">Save listings and access them from any device. Use the Sign in button at the top right.</p>
+      </div>
+    );
+  }
 
   return (
     <div>
