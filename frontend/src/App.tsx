@@ -269,7 +269,7 @@ export default function App() {
 
       {page === "detail" ? (
         <div className="detail-wrap">
-          <ListingDetail id={detailId!} isSaved={isSaved(detailId!)} onToggle={() => { if (!user) { setShowAuthMenu(true); return; } toggle(detailId!); }} />
+          <ListingDetail id={detailId!} isSaved={isSaved(detailId!)} onToggle={() => toggle(detailId!)} />
         </div>
       ) : page === "trends" ? (
         <Trends />
@@ -479,7 +479,7 @@ export default function App() {
                   <li key={listing.id} className="card">
                     <div className="card-img-wrap">
                       {listing.image_url && <img src={listing.image_url} alt={listing.title} referrerPolicy="no-referrer" />}
-                      <button className={`bookmark-btn${isSaved(listing.id) ? " active" : ""}`} onClick={() => { if (!user) { setShowAuthMenu(true); return; } toggle(listing.id); }} aria-label={t("save_listing")}>🔖</button>
+                      <button className={`bookmark-btn${isSaved(listing.id) ? " active" : ""}`} onClick={() => toggle(listing.id)} aria-label={t("save_listing")}>🔖</button>
                       <button className={`compare-btn${isComparing(listing.id) ? " active" : ""}${compareIds.length >= 3 && !isComparing(listing.id) ? " disabled" : ""}`} onClick={() => { if (compareIds.length < 3 || isComparing(listing.id)) toggleCompare(listing.id); }} aria-label={t("compare_add")} title={t("compare_add")}>⊕</button>
                     </div>
                     <div className="card-body">

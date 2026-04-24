@@ -28,28 +28,18 @@ export default function Saved({ saved, toggle, isComparing, toggleCompare, compa
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!user || saved.size === 0) { setListings([]); return; }
+    if (saved.size === 0) { setListings([]); return; }
     setLoading(true);
     fetchListingsByIds([...saved])
       .then(setListings)
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
-  }, [saved, user]);
+  }, [saved]);
 
   // Remove listings from local state immediately when unbookmarked
   useEffect(() => {
     setListings((prev) => prev.filter((l) => saved.has(l.id)));
   }, [saved]);
-
-  if (!user) {
-    return (
-      <div className="auth-gate">
-        <div className="auth-gate-icon">🔖</div>
-        <h2 className="auth-gate-title">{t("saved_auth_title")}</h2>
-        <p className="auth-gate-sub">{t("saved_auth_subtitle")}</p>
-      </div>
-    );
-  }
 
   return (
     <div>
@@ -61,6 +51,18 @@ export default function Saved({ saved, toggle, isComparing, toggleCompare, compa
           </div>
         </div>
       </div>
+      {!user && saved.size > 0 && (
+        <div className="saved-sync-banner">
+          <span>🔖 {t("saved_auth_subtitle")}</span>
+        </div>
+      )}
+      {!user && saved.size === 0 && (
+        <div className="auth-gate">
+          <div className="auth-gate-icon">🔖</div>
+          <h2 className="auth-gate-title">{t("saved_auth_title")}</h2>
+          <p className="auth-gate-sub">{t("saved_auth_subtitle")}</p>
+        </div>
+      )}
 
       <div className="saved-body">
         {loading && <p className="state">{t("loading")}</p>}

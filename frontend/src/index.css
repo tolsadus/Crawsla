@@ -1316,6 +1316,17 @@ code {
 .status-badge.ok      { background: #d1fae5; color: #065f46; }
 .status-badge.missing { background: #fee2e2; color: #991b1b; }
 
+/* ── Guest watchlist sync banner ─────────────────────────────── */
+.saved-sync-banner {
+  margin: 0 2.5rem 1.5rem;
+  padding: 0.75rem 1.25rem;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  color: #92400e;
+}
+
 /* ── Compare button on cards ─────────────────────────────────── */
 .compare-btn {
   position: absolute;

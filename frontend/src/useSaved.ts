@@ -23,8 +23,7 @@ export function useSaved(user: User | null) {
   // When user logs in, load their DB watchlist and merge with localStorage
   useEffect(() => {
     if (!user) {
-      setSaved(new Set());
-      lsSave(new Set());
+      setSaved(lsLoad());
       return;
     }
     supabase
