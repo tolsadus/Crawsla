@@ -20,7 +20,7 @@ function formatDate(iso: string): string {
   return new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(iso));
 }
 
-export default function Saved({ saved, toggle }: { saved: Set<number>; toggle: (id: number) => void }) {
+export default function Saved({ saved, toggle, isComparing, toggleCompare, compareCount }: { saved: Set<number>; toggle: (id: number) => void; isComparing: (id: number) => boolean; toggleCompare: (id: number) => void; compareCount: number }) {
   const { user } = useAuth();
   const { t } = useTranslation();
   const [listings, setListings] = useState<Listing[]>([]);
@@ -74,14 +74,8 @@ export default function Saved({ saved, toggle }: { saved: Set<number>; toggle: (
             <li key={listing.id} className="card">
               <div className="card-img-wrap">
                 {listing.image_url && <img src={listing.image_url} alt={listing.title} referrerPolicy="no-referrer" />}
-                <button
-                  className={`bookmark-btn active`}
-                  onClick={() => toggle(listing.id)}
-                  aria-label={t("saved_remove")}
-                  title={t("saved_remove")}
-                >
-                  ✕
-                </button>
+                <button className="bookmark-btn active" onClick={() => toggle(listing.id)} aria-label={t("saved_remove")} title={t("saved_remove")}>✕</button>
+                <button className={`compare-btn${isComparing(listing.id) ? " active" : ""}${compareCount >= 3 && !isComparing(listing.id) ? " disabled" : ""}`} onClick={() => { if (compareCount < 3 || isComparing(listing.id)) toggleCompare(listing.id); }} aria-label={t("compare_add")} title={t("compare_add")}>⊕</button>
               </div>
               <div className="card-body">
                 <h3>{listing.title}</h3>

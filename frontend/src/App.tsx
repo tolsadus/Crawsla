@@ -276,7 +276,7 @@ export default function App() {
       ) : page === "dropped" ? (
         <Dropped />
       ) : page === "watchlist" ? (
-        <Saved saved={saved} toggle={toggle} />
+        <Saved saved={saved} toggle={toggle} isComparing={isComparing} toggleCompare={toggleCompare} compareCount={compareIds.length} />
       ) : page === "details" && isAdmin ? (
         <Details />
       ) : page === "compare" ? (
