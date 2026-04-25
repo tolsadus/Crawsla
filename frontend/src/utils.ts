@@ -22,6 +22,13 @@ export function getDrivetrain(listing: Listing): Drivetrain | null {
   return null;
 }
 
+export function formatFuel(fuel: string | null, t: (k: any) => string): string {
+  if (!fuel) return "—";
+  if (/electr/i.test(fuel)) return t("fuel_electric");
+  if (/hybride|hybrid/i.test(fuel)) return t("fuel_hybrid");
+  return fuel;
+}
+
 export const DRIVETRAIN_LABEL: Record<Drivetrain, string> = {
   RWD: "RWD",
   AWD: "AWD",

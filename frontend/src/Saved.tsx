@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { fetchListingsByIds } from "./api";
 import type { Listing } from "./types";
 import { useAuth } from "./useAuth";
-import { getDrivetrain, DRIVETRAIN_LABEL } from "./utils";
+import { getDrivetrain, DRIVETRAIN_LABEL, formatFuel } from "./utils";
 import { useTranslation } from "./i18n";
 
 function formatPrice(v: number | null): string {
@@ -91,7 +91,7 @@ export default function Saved({ saved, toggle, isComparing, toggleCompare, compa
                     <span className="price-delta delta-down"><s>{formatPrice(listing.max_price)}</s></span>
                   )}
                 </div>
-                <p className="meta">{listing.year ?? "—"} · {formatKm(listing.mileage_km, t("card_new"))} · {listing.fuel ?? "—"}</p>
+                <p className="meta">{listing.year ?? "—"} · {formatKm(listing.mileage_km, t("card_new"))} · {formatFuel(listing.fuel, t)}</p>
                 <p className="location">{listing.location ?? ""}</p>
                 <p className="scraped-at">{t("card_crawled")} {formatDate(listing.scraped_at)}</p>
                 <div className="cta-row">

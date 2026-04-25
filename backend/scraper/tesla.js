@@ -37,7 +37,8 @@ function parseItem(item, model, condition) {
   const mileage_km = typeof odometer === 'number' && odometer > 0 ? Math.round(odometer) : 0
 
   const paintOption = (item.OptionCodeData || []).find(o => o.group === 'PAINT')
-  const color = paintOption?.long_name ?? paintOption?.name ?? null
+  const rawColor = paintOption?.long_name ?? paintOption?.name ?? null
+  const color = rawColor ? rawColor.replace(/^Coloris\s+/i, '').trim() : null
 
   const cabinKey = (item.CABIN_CONFIG || [])[0]
   const seats = CABIN_SEATS[cabinKey] ?? null

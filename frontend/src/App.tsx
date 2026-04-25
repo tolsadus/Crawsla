@@ -14,7 +14,7 @@ import { useCompare } from "./useCompare";
 import { useAuth } from "./useAuth";
 import { useTranslation } from "./i18n";
 import type { Listing, ListingFilters } from "./types";
-import { getDrivetrain, DRIVETRAIN_LABEL } from "./utils";
+import { getDrivetrain, DRIVETRAIN_LABEL, formatFuel } from "./utils";
 
 const MODELS = ["Model S", "Model 3", "Model X", "Model Y"] as const;
 const SOURCES = ["tesla", "leboncoin", "lacentrale", "capcar", "lbauto", "aramisauto", "gmecars", "renew"] as const;
@@ -495,7 +495,7 @@ export default function App() {
                         )}
                       </div>
                       <p className="meta">
-                        {listing.year ?? "—"} · {formatKm(listing.mileage_km, t("card_new"))} · {listing.fuel ?? "—"}
+                        {listing.year ?? "—"} · {formatKm(listing.mileage_km, t("card_new"))} · {formatFuel(listing.fuel, t)}
                       </p>
                       <p className="location">{listing.location ?? ""}</p>
                       <p className="scraped-at">{t("card_crawled")} {formatDate(listing.scraped_at)}</p>
