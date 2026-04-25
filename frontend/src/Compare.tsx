@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { fetchListing, fetchPhotos, fetchPriceHistory } from "./api";
 import type { Listing, PricePoint } from "./types";
-import { getDrivetrain, DRIVETRAIN_LABEL } from "./utils";
+import { getDrivetrain, DRIVETRAIN_LABEL, formatColor } from "./utils";
 import { useTranslation } from "./i18n";
 
 function formatPrice(v: number | null): string {
@@ -108,7 +108,7 @@ function buildSpecs(cols: ColData[], t: (k: any) => string): SpecRow[] {
     { label: t("compare_spec_drivetrain"), values: cols.map((c) => { const dt = (c.listing.drivetrain as any) ?? getDrivetrain(c.listing); return dt ? (DRIVETRAIN_LABEL[dt as keyof typeof DRIVETRAIN_LABEL] ?? dt) : null; }) },
     { label: t("compare_spec_autopilot"),  values: cols.map((c) => c.listing.autopilot ?? null) },
     { label: t("compare_spec_power"),      values: cols.map((c) => c.listing.horse_power != null ? `${c.listing.horse_power} ch` : null) },
-    { label: t("compare_spec_color"),      values: cols.map((c) => c.listing.color ?? null) },
+    { label: t("compare_spec_color"),      values: cols.map((c) => formatColor(c.listing.color)) },
     { label: t("compare_spec_seats"),      values: cols.map((c) => c.listing.seats != null ? String(c.listing.seats) : null) },
     { label: t("compare_spec_soh"),        values: cols.map((c) => c.listing.soh != null ? `${c.listing.soh}%` : null) },
     { label: t("compare_spec_source"),     values: cols.map((c) => c.listing.source ?? null) },

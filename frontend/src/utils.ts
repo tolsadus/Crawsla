@@ -24,9 +24,15 @@ export function getDrivetrain(listing: Listing): Drivetrain | null {
 
 export function formatFuel(fuel: string | null, t: (k: any) => string): string {
   if (!fuel) return "—";
-  if (/electr/i.test(fuel)) return t("fuel_electric");
-  if (/hybride|hybrid/i.test(fuel)) return t("fuel_hybrid");
+  const n = fuel.normalize("NFD").replace(/[̀-ͯ]/g, "");
+  if (/electr/i.test(n)) return t("fuel_electric");
+  if (/hybrid/i.test(n)) return t("fuel_hybrid");
   return fuel;
+}
+
+export function formatColor(color: string | null): string | null {
+  if (!color) return null;
+  return color.replace(/^coloris\s+/i, "").trim();
 }
 
 export const DRIVETRAIN_LABEL: Record<Drivetrain, string> = {
