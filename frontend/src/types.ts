@@ -18,6 +18,7 @@ export type Listing = {
   min_price: number | null;
   max_price: number | null;
   price_delta: number | null;
+  drop_pct: number | null;
   drivetrain: string | null;
   soh: number | null;
   color: string | null;
@@ -54,7 +55,7 @@ export type PricePoint = {
   recorded_at: string;
 };
 
-export type SortBy = "scraped_at" | "mileage_km" | "year" | "price" | "price_delta";
+export type SortBy = "scraped_at" | "mileage_km" | "year" | "price" | "price_delta" | "drop_pct";
 export type SortDir = "asc" | "desc";
 
 export type TrendPoint = {

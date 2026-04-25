@@ -7,6 +7,7 @@ const SORT_COLUMN: Record<string, string> = {
   year: "year",
   price: "price_eur",
   price_delta: "price_delta",
+  drop_pct: "drop_pct",
 };
 
 const COLOR_OR: Record<string, string> = {

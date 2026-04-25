@@ -36,7 +36,8 @@ const en = {
   sort_mileage_desc: "Mileage ↓",
   sort_year_newest: "Year (newest)",
   sort_year_oldest: "Year (oldest)",
-  sort_biggest_drop: "Biggest drop",
+  sort_biggest_drop_eur: "Biggest drop (€)",
+  sort_biggest_drop_pct: "Biggest drop (%)",
   // Listings page
   listings_subtitle: "Crawled once a day from all sources",
   listings_in_stock: "in stock",
@@ -182,7 +183,8 @@ const fr: Record<TKey, string> = {
   sort_mileage_desc: "Km ↓",
   sort_year_newest: "Année (récente)",
   sort_year_oldest: "Année (ancienne)",
-  sort_biggest_drop: "Meilleure baisse",
+  sort_biggest_drop_eur: "Meilleure baisse (€)",
+  sort_biggest_drop_pct: "Meilleure baisse (%)",
   // Listings page
   listings_subtitle: "Mis à jour quotidiennement depuis toutes les sources",
   listings_in_stock: "en stock",

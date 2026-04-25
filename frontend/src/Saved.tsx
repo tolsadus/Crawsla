@@ -78,6 +78,12 @@ export default function Saved({ saved, toggle, isComparing, toggleCompare, compa
                 {listing.image_url && <img src={listing.image_url} alt={listing.title} referrerPolicy="no-referrer" />}
                 <button className="bookmark-btn active" onClick={() => toggle(listing.id)} aria-label={t("saved_remove")} title={t("saved_remove")}>✕</button>
                 <button className={`compare-btn${isComparing(listing.id) ? " active" : ""}${compareCount >= 3 && !isComparing(listing.id) ? " disabled" : ""}`} onClick={() => { if (compareCount < 3 || isComparing(listing.id)) toggleCompare(listing.id); }} aria-label={t("compare_add")} title={t("compare_add")}>⊕</button>
+                {listing.price_delta !== null && listing.price_delta > 0 && listing.max_price !== null && (
+                  <div className="card-drop-badge">
+                    −{formatPrice(listing.price_delta)}
+                    <span className="card-drop-pct">−{Math.round((listing.price_delta / listing.max_price) * 100)}%</span>
+                  </div>
+                )}
               </div>
               <div className="card-body">
                 <h3>{listing.title}</h3>
@@ -87,7 +93,7 @@ export default function Saved({ saved, toggle, isComparing, toggleCompare, compa
                 </div>
                 <div className="price-row">
                   <p className="price">{formatPrice(listing.price_eur)}</p>
-                  {listing.max_price !== null && listing.price_eur !== null && listing.max_price > listing.price_eur && (
+                  {listing.price_delta !== null && listing.price_delta > 0 && listing.max_price !== null && (
                     <span className="price-delta delta-down"><s>{formatPrice(listing.max_price)}</s></span>
                   )}
                 </div>

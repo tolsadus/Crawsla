@@ -167,7 +167,8 @@ export default function App() {
     { label: t("sort_mileage_desc"),sort_by: "mileage_km" as const, sort_dir: "desc" as const },
     { label: t("sort_year_newest"), sort_by: "year"       as const, sort_dir: "desc" as const },
     { label: t("sort_year_oldest"), sort_by: "year"       as const, sort_dir: "asc"  as const },
-    { label: t("sort_biggest_drop"),sort_by: "price_delta"as const, sort_dir: "asc"  as const },
+    { label: t("sort_biggest_drop_eur"), sort_by: "price_delta" as const, sort_dir: "desc" as const },
+    { label: t("sort_biggest_drop_pct"), sort_by: "drop_pct"    as const, sort_dir: "desc" as const },
   ];
   const [totalCount, setTotalCount] = useState<number | null>(null);
   const [filteredCount, setFilteredCount] = useState<number | null>(null);
@@ -274,7 +275,7 @@ export default function App() {
       ) : page === "trends" ? (
         <Trends />
       ) : page === "dropped" ? (
-        <Dropped />
+        <Dropped isSaved={isSaved} toggle={toggle} isComparing={isComparing} toggleCompare={toggleCompare} compareCount={compareIds.length} />
       ) : page === "watchlist" ? (
         <Saved saved={saved} toggle={toggle} isComparing={isComparing} toggleCompare={toggleCompare} compareCount={compareIds.length} />
       ) : page === "details" && isAdmin ? (
@@ -481,6 +482,12 @@ export default function App() {
                       {listing.image_url && <img src={listing.image_url} alt={listing.title} referrerPolicy="no-referrer" />}
                       <button className={`bookmark-btn${isSaved(listing.id) ? " active" : ""}`} onClick={() => toggle(listing.id)} aria-label={t("save_listing")}>🔖</button>
                       <button className={`compare-btn${isComparing(listing.id) ? " active" : ""}${compareIds.length >= 3 && !isComparing(listing.id) ? " disabled" : ""}`} onClick={() => { if (compareIds.length < 3 || isComparing(listing.id)) toggleCompare(listing.id); }} aria-label={t("compare_add")} title={t("compare_add")}>⊕</button>
+                      {listing.price_delta !== null && listing.price_delta > 0 && listing.max_price !== null && (
+                        <div className="card-drop-badge">
+                          −{formatPrice(listing.price_delta)}
+                          <span className="card-drop-pct">−{Math.round((listing.price_delta / listing.max_price) * 100)}%</span>
+                        </div>
+                      )}
                     </div>
                     <div className="card-body">
                       <h3>{listing.title}</h3>
@@ -490,7 +497,7 @@ export default function App() {
                       </div>
                       <div className="price-row">
                         <p className="price">{formatPrice(listing.price_eur)}</p>
-                        {listing.max_price !== null && listing.price_eur !== null && listing.max_price > listing.price_eur && (
+                        {listing.price_delta !== null && listing.price_delta > 0 && listing.max_price !== null && (
                           <span className="price-delta delta-down"><s>{formatPrice(listing.max_price)}</s></span>
                         )}
                       </div>

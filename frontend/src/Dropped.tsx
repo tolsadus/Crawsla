@@ -4,6 +4,14 @@ import type { DroppedListing } from "./types";
 import { getDrivetrain, DRIVETRAIN_LABEL } from "./utils";
 import { useTranslation } from "./i18n";
 
+type Props = {
+  isSaved: (id: number) => boolean;
+  toggle: (id: number) => void;
+  isComparing: (id: number) => boolean;
+  toggleCompare: (id: number) => void;
+  compareCount: number;
+};
+
 function formatPrice(v: number | null): string {
   if (v === null) return "—";
   return new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(v);
@@ -18,7 +26,7 @@ function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" });
 }
 
-export default function Dropped() {
+export default function Dropped({ isSaved, toggle, isComparing, toggleCompare, compareCount }: Props) {
   const { t } = useTranslation();
   const [drops, setDrops] = useState<DroppedListing[]>([]);
   const [hours, setHours] = useState(48);
@@ -76,11 +84,13 @@ export default function Dropped() {
                   ? <img src={d.image_url} alt={d.title} referrerPolicy="no-referrer" />
                   : <div className="dropped-img-placeholder" />
                 }
-                {rank !== undefined && <span className="dropped-medal">{MEDALS[rank]}</span>}
+                <button className={`bookmark-btn${isSaved(d.id) ? " active" : ""}`} onClick={() => toggle(d.id)} aria-label="Save">🔖</button>
+                <button className={`compare-btn${isComparing(d.id) ? " active" : ""}${compareCount >= 3 && !isComparing(d.id) ? " disabled" : ""}`} onClick={() => { if (compareCount < 3 || isComparing(d.id)) toggleCompare(d.id); }} aria-label="Compare">⊕</button>
                 <div className="dropped-drop-badge">
                   −{formatPrice(d.drop_amount)}
                   <span className="dropped-pct">−{d.drop_pct}%</span>
                 </div>
+                {rank !== undefined && <span className="dropped-medal">{MEDALS[rank]}</span>}
               </div>
               <div className="dropped-body">
                 <h3 className="dropped-name">{d.title}</h3>
