@@ -15,7 +15,7 @@ export type Listing = {
   url: string;
   image_url: string | null;
   scraped_at: string;
-  first_price: number | null;
+  min_price: number | null;
   max_price: number | null;
   price_delta: number | null;
   drivetrain: string | null;
