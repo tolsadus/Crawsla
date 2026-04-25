@@ -17,7 +17,7 @@ import type { Listing, ListingFilters } from "./types";
 import { getDrivetrain, DRIVETRAIN_LABEL, formatFuel } from "./utils";
 
 const MODELS = ["Model S", "Model 3", "Model X", "Model Y"] as const;
-const SOURCES = ["tesla", "leboncoin", "lacentrale", "capcar", "lbauto", "aramisauto", "gmecars", "renew"] as const;
+const SOURCES = ["tesla", "leboncoin", "lacentrale", "capcar", "lbauto", "aramisauto", "gmecars", "renew", "heycar"] as const;
 
 
 

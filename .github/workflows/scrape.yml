@@ -10,9 +10,9 @@ on:
         type: choice
         options:
           - ''
-          - tesla
           - capcar
           - gmecars
+          - heycar
           - lbauto
           - renew
 
@@ -35,12 +35,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run tesla
-        if: inputs.scraper == '' || inputs.scraper == 'tesla'
-        run: node scraper/cli.js tesla
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-
       - name: Run capcar
         if: inputs.scraper == '' || inputs.scraper == 'capcar'
         run: node scraper/cli.js capcar --pages 20
@@ -49,13 +43,19 @@ jobs:
 
       - name: Run gmecars
         if: inputs.scraper == '' || inputs.scraper == 'gmecars'
-        run: node scraper/cli.js gmecars --pages 5
+        run: node scraper/cli.js gmecars --pages 2
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Run lbauto
         if: inputs.scraper == '' || inputs.scraper == 'lbauto'
         run: node scraper/cli.js lbauto --pages 10
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Run heycar
+        if: inputs.scraper == '' || inputs.scraper == 'heycar'
+        run: node scraper/cli.js heycar
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
