@@ -31,19 +31,19 @@ function sortKey(f: ListingFilters): string {
   return `${f.sort_by ?? "scraped_at"}:${f.sort_dir ?? "desc"}`;
 }
 
-function formatPrice(v: number | null): string {
+function formatPrice(v: number | null, locale: string): string {
   if (v === null) return "—";
-  return new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(v);
+  return new Intl.NumberFormat(locale, { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(v);
 }
 
-function formatKm(v: number | null, newLabel = "New"): string {
+function formatKm(v: number | null, newLabel = "New", locale = "fr-FR"): string {
   if (v === null) return "—";
   if (v <= 100) return newLabel;
-  return `${new Intl.NumberFormat("fr-FR").format(v)} km`;
+  return `${new Intl.NumberFormat(locale).format(v)} km`;
 }
 
-function formatDate(iso: string): string {
-  return new Intl.DateTimeFormat("fr-FR", {
+function formatDate(iso: string, locale: string): string {
+  return new Intl.DateTimeFormat(locale, {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -155,6 +155,7 @@ function ScrollToTop() {
 
 export default function App() {
   const { t, lang, setLang } = useTranslation();
+  const locale = lang === "fr" ? "fr-FR" : "en-GB";
   const hash = useHashRoute();
   const page = parsePage(hash);
   const detailId = parseListingId(hash);
@@ -490,7 +491,7 @@ export default function App() {
                       <button className={`compare-btn${isComparing(listing.id) ? " active" : ""}${compareIds.length >= 3 && !isComparing(listing.id) ? " disabled" : ""}`} onClick={() => { if (compareIds.length < 3 || isComparing(listing.id)) toggleCompare(listing.id); }} aria-label={t("compare_add")} title={t("compare_add")}>⊕</button>
                       {listing.price_delta !== null && listing.price_delta > 0 && listing.max_price !== null && (
                         <div className="card-drop-badge">
-                          −{formatPrice(listing.price_delta)}
+                          −{formatPrice(listing.price_delta, locale)}
                           <span className="card-drop-pct">−{Math.round((listing.price_delta / listing.max_price) * 100)}%</span>
                         </div>
                       )}
@@ -503,16 +504,16 @@ export default function App() {
                         {listing.auction_date && <a className="auction-badge badge-clickable" href="#/auctions">🔨 Auction</a>}
                       </div>
                       <div className="price-row">
-                        <p className="price">{formatPrice(listing.price_eur)}</p>
+                        <p className="price">{formatPrice(listing.price_eur, locale)}</p>
                         {listing.price_delta !== null && listing.price_delta > 0 && listing.max_price !== null && (
-                          <span className="price-delta delta-down"><s>{formatPrice(listing.max_price)}</s></span>
+                          <span className="price-delta delta-down"><s>{formatPrice(listing.max_price, locale)}</s></span>
                         )}
                       </div>
                       <p className="meta">
-                        {listing.year ?? "—"} · {formatKm(listing.mileage_km, t("card_new"))} · {formatFuel(listing.fuel, t)}
+                        {listing.year ?? "—"} · {formatKm(listing.mileage_km, t("card_new"), locale)} · {formatFuel(listing.fuel, t)}
                       </p>
                       <p className="location">{listing.location ?? ""}</p>
-                      <p className="scraped-at">{t("card_crawled")} {formatDate(listing.scraped_at)}</p>
+                      <p className="scraped-at">{t("card_crawled")} {formatDate(listing.scraped_at, locale)}</p>
                       <div className="cta-row">
                         <a className="btn btn-primary" href={`#/listing/${listing.id}`}>{t("card_view")}</a>
                         <span className="btn btn-secondary">{listing.source}</span>

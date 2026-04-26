@@ -4,22 +4,23 @@ import { useTranslation } from "./i18n";
 import type { Listing } from "./types";
 import { DRIVETRAIN_LABEL } from "./utils";
 
-function formatPrice(v: number | null, fallback: string): string {
+function formatPrice(v: number | null, fallback: string, locale: string): string {
   if (v === null) return fallback;
-  return new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(v);
+  return new Intl.NumberFormat(locale, { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(v);
 }
 
-function formatKm(v: number | null): string {
+function formatKm(v: number | null, locale: string): string {
   if (v === null) return "—";
-  return `${new Intl.NumberFormat("fr-FR").format(v)} km`;
+  return `${new Intl.NumberFormat(locale).format(v)} km`;
 }
 
-function formatAuctionDate(dateStr: string): string {
-  return new Intl.DateTimeFormat("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(new Date(dateStr + "T00:00:00"));
+function formatAuctionDate(dateStr: string, locale: string): string {
+  return new Intl.DateTimeFormat(locale, { weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(new Date(dateStr + "T00:00:00"));
 }
 
 export default function Auctions() {
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
+  const locale = lang === "fr" ? "fr-FR" : "en-GB";
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -62,7 +63,7 @@ export default function Auctions() {
           <div key={date} className="auction-group">
             <h3 className="auction-date-header">
               <span className="auction-date-icon">🗓</span>
-              {formatAuctionDate(date)}
+              {formatAuctionDate(date, locale)}
             </h3>
             <ul className="auction-list">
               {grouped[date].map((listing) => {
@@ -82,12 +83,12 @@ export default function Auctions() {
                       </div>
                       <h4 className="auction-card-title">{listing.title}</h4>
                       <p className="auction-card-meta">
-                        {listing.year ?? "—"} · {formatKm(listing.mileage_km)} · {listing.location ?? "—"}
+                        {listing.year ?? "—"} · {formatKm(listing.mileage_km, locale)} · {listing.location ?? "—"}
                       </p>
                     </div>
                     <div className="auction-card-price">
                       <p className="auction-price">
-                        {formatPrice(listing.price_eur, t("auctions_tba"))}
+                        {formatPrice(listing.price_eur, t("auctions_tba"), locale)}
                       </p>
                       <a className="btn btn-primary btn-sm" href={listing.url} target="_blank" rel="noreferrer">
                         {t("auctions_view")}
