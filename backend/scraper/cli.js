@@ -11,7 +11,7 @@ async function finalize() {
   } catch (err) {
     console.error('Failed to refresh listings_with_delta:', err.message)
   }
-  await finalize()
+  await pool.end()
 }
 
 function makeOnPage(total) {
