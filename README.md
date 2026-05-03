@@ -27,6 +27,10 @@ Aggregated Tesla used-car listings scraped from multiple French marketplaces. Re
 | [Renew Auto](https://fr.renew.auto) | `renew` | HTTP — parses `window.APP_STATE` JSON blob |
 | [LB Automobiles](https://www.lb-automobiles.com) | `lbauto` | HTTP — parses `application/ld+json` structured data |
 | [La Centrale](https://www.lacentrale.fr) | `lacentrale` | Playwright — DOM extraction from SSR HTML (supports account login) |
+| [Heycar](https://heycar.com/fr) | `heycar` | HTTP — parses Next.js RSC payload for `listing_id` JSON fragments |
+| [Alcopa Auction](https://www.alcopa-auction.fr) | `alcopa` | HTTP + HTML regex parsing (auction listings) |
+
+> **Note:** `tesla` and `alcopa` block GitHub-hosted runner IPs, so they only run locally — not from the scheduled GitHub Action.
 
 ## Stack
 
@@ -91,6 +95,8 @@ Frontend runs on `http://localhost:5173`.
 | `./scrape.sh aramisauto --headed` | Open browser window if blocked |
 | `./scrape.sh renew` | Scrape Renew Auto |
 | `./scrape.sh lbauto` | Scrape LB Automobiles |
+| `./scrape.sh heycar` | Scrape Heycar |
+| `./scrape.sh alcopa` | Scrape Alcopa Auction (local only — blocks GitHub IPs) |
 | `./scrape.sh lacentrale` | Scrape La Centrale (1 page, headless) |
 | `./scrape.sh lacentrale --headed` | Open browser window — required on first run to solve captcha |
 | `./scrape.sh lacentrale --pages 5` | Multiple pages |
