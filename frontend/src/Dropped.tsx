@@ -11,6 +11,7 @@ type Props = {
   isComparing: (id: number) => boolean;
   toggleCompare: (id: number) => void;
   compareCount: number;
+  onSignIn: () => void;
 };
 
 function formatPrice(v: number | null): string {
