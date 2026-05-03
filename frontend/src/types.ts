@@ -16,6 +16,7 @@ export type Listing = {
   image_url: string | null;
   scraped_at: string;
   removed_at: string | null;
+  community_flagged_at: string | null;
   min_price: number | null;
   max_price: number | null;
   price_delta: number | null;

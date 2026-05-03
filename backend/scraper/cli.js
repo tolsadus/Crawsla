@@ -2,24 +2,21 @@
 'use strict'
 
 const { Command } = require('commander')
-const { upsert, pool, deleteStaleAuctions, refreshDelta, markRemoved, markRemovedByAge } = require('./db')
+const { upsert, pool, refreshDelta, markRemovedByAge } = require('./db')
 
-const STALE_AGE_SOURCES = new Set(['leboncoin', 'lacentrale'])
-const STALE_AGE_DAYS = 7
+const PAGINATED_SOURCES = new Set(['leboncoin', 'lacentrale'])
+const STALE_DAYS_DEFAULT = 3
+const STALE_DAYS_PAGINATED = 7
 
-async function markRemovedFor(source, runStart, total) {
+async function markRemovedFor(source, _runStart, total) {
   try {
-    if (STALE_AGE_SOURCES.has(source)) {
-      const n = await markRemovedByAge(source, STALE_AGE_DAYS)
-      if (n > 0) console.log(`  [db] ${source}: ${n} listings unseen for ${STALE_AGE_DAYS}+ days marked as removed`)
-    } else {
-      if (total.count === 0) {
-        console.log(`  [db] skipping markRemoved for ${source}: no listings upserted`)
-        return
-      }
-      const n = await markRemoved(source, runStart)
-      if (n > 0) console.log(`  [db] ${source}: ${n} listings missed this run marked as removed`)
+    if (total.count === 0) {
+      console.log(`  [db] skipping markRemoved for ${source}: no listings upserted`)
+      return
     }
+    const days = PAGINATED_SOURCES.has(source) ? STALE_DAYS_PAGINATED : STALE_DAYS_DEFAULT
+    const n = await markRemovedByAge(source, days)
+    if (n > 0) console.log(`  [db] ${source}: ${n} listings unseen for ${days}+ days marked as removed`)
   } catch (err) {
     console.error(`Failed to mark removed for ${source}:`, err.message)
   }
@@ -161,8 +158,6 @@ program
     const runStart = new Date().toISOString()
     await scrape({ onPage: makeOnPage(total) })
     console.log(`\nDone. Upserted ${total.count} listings.`)
-    const removed = await deleteStaleAuctions('alcopa', 2)
-    console.log(`Removed ${removed} alcopa auctions older than 2 days.`)
     await finalize('alcopa', runStart, total)
   })
 

@@ -306,7 +306,7 @@ export default function App() {
       ) : page === "trends" ? (
         <Trends />
       ) : page === "dropped" ? (
-        <Dropped isSaved={isSaved} toggle={toggle} isComparing={isComparing} toggleCompare={toggleCompare} compareCount={compareIds.length} />
+        <Dropped isSaved={isSaved} toggle={toggle} isComparing={isComparing} toggleCompare={toggleCompare} compareCount={compareIds.length} onSignIn={() => setShowAuthMenu(true)} />
       ) : page === "auctions" ? (
         <Auctions />
       ) : page === "watchlist" ? (

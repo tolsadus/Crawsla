@@ -198,19 +198,6 @@ async function refreshDelta() {
   await pool.query('SELECT public.refresh_listings_with_delta()')
 }
 
-async function markRemoved(source, runStart) {
-  const res = await pool.query(
-    `UPDATE listings
-        SET removed_at = NOW()
-      WHERE source = $1
-        AND scraped_at < $2
-        AND removed_at IS NULL
-      RETURNING id`,
-    [source, runStart]
-  )
-  return res.rowCount
-}
-
 async function markRemovedByAge(source, days = 7) {
   const res = await pool.query(
     `UPDATE listings
@@ -224,16 +211,4 @@ async function markRemovedByAge(source, days = 7) {
   return res.rowCount
 }
 
-async function deleteStaleAuctions(source, daysOld = 2) {
-  const res = await pool.query(
-    `DELETE FROM listings
-     WHERE source = $1
-       AND auction_date IS NOT NULL
-       AND auction_date < CURRENT_DATE - ($2 || ' days')::interval
-     RETURNING id`,
-    [source, String(daysOld)]
-  )
-  return res.rowCount
-}
-
-module.exports = { pool, upsert, deleteStaleAuctions, refreshDelta, markRemoved, markRemovedByAge }
+module.exports = { pool, upsert, refreshDelta, markRemovedByAge }

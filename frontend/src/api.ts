@@ -147,6 +147,40 @@ export async function searchListings(q: string, limit = 8): Promise<Listing[]> {
   return (data ?? []) as Listing[];
 }
 
+export type VoteValue = -1 | 1;
+export type VoteSummary = { up: number; down: number; mine: VoteValue | null };
+
+export async function fetchVoteSummary(listingId: number, userId: string | null): Promise<VoteSummary> {
+  const { data, error } = await supabase
+    .from("listing_votes")
+    .select("vote, user_id")
+    .eq("listing_id", listingId);
+  if (error) throw new Error(error.message);
+  let up = 0, down = 0, mine: VoteValue | null = null;
+  for (const row of data ?? []) {
+    if (row.vote === 1) up++;
+    else if (row.vote === -1) down++;
+    if (userId && row.user_id === userId) mine = row.vote as VoteValue;
+  }
+  return { up, down, mine };
+}
+
+export async function castVote(listingId: number, userId: string, vote: VoteValue): Promise<void> {
+  const { error } = await supabase
+    .from("listing_votes")
+    .upsert({ listing_id: listingId, user_id: userId, vote }, { onConflict: "listing_id,user_id" });
+  if (error) throw new Error(error.message);
+}
+
+export async function clearVote(listingId: number, userId: string): Promise<void> {
+  const { error } = await supabase
+    .from("listing_votes")
+    .delete()
+    .eq("listing_id", listingId)
+    .eq("user_id", userId);
+  if (error) throw new Error(error.message);
+}
+
 export async function fetchModelCounts(models: readonly string[]): Promise<Record<string, number>> {
   const counts = await Promise.all(models.map((m) => fetchCount({ model: m })));
   return Object.fromEntries(models.map((m, i) => [m, counts[i]]));

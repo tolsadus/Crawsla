@@ -3,6 +3,7 @@ import { fetchRecentDrops } from "./api";
 import type { DroppedListing } from "./types";
 import { getDrivetrain, DRIVETRAIN_LABEL } from "./utils";
 import { useTranslation } from "./i18n";
+import { useAuth } from "./useAuth";
 
 type Props = {
   isSaved: (id: number) => boolean;
@@ -28,6 +29,7 @@ function formatDate(iso: string): string {
 
 export default function Dropped({ isSaved, toggle, isComparing, toggleCompare, compareCount }: Props) {
   const { t } = useTranslation();
+  const { user, signInWithGoogle } = useAuth();
   const [drops, setDrops] = useState<DroppedListing[]>([]);
   const [hours, setHours] = useState(48);
   const [loading, setLoading] = useState(true);
@@ -114,9 +116,17 @@ export default function Dropped({ isSaved, toggle, isComparing, toggleCompare, c
         return (
           <>
             <p className="dropped-section-label">{t("dropped_top")}</p>
-            <ul className="dropped-podium">
-              {top.map((d, i) => renderCard(d, i))}
-            </ul>
+            <div className={`dropped-podium-wrap${!user ? " is-locked" : ""}`}>
+              <ul className="dropped-podium">
+                {top.map((d, i) => renderCard(d, i))}
+              </ul>
+              {!user && (
+                <div className="dropped-podium-overlay">
+                  <p>{t("dropped_signin_prompt")}</p>
+                  <button className="btn btn-primary" onClick={signInWithGoogle}>{t("dropped_signin_btn")}</button>
+                </div>
+              )}
+            </div>
             {rest.length > 0 && (
               <>
                 <p className="dropped-section-label">{t("dropped_others")}</p>

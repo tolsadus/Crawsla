@@ -24,6 +24,7 @@ export default function Auctions() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showPast, setShowPast] = useState(false);
 
   useEffect(() => {
     fetchAuctions()
@@ -40,7 +41,10 @@ export default function Auctions() {
   }, {});
 
   const todayStr = new Date().toISOString().slice(0, 10);
-  const sortedDates = Object.keys(grouped).sort();
+  const allDates = Object.keys(grouped);
+  const upcomingDates = allDates.filter((d) => d === "unknown" || d >= todayStr).sort().reverse();
+  const pastDates = allDates.filter((d) => d !== "unknown" && d < todayStr).sort().reverse();
+  const pastCount = pastDates.reduce((n, d) => n + grouped[d].length, 0);
 
   return (
     <div className="auctions-page">
@@ -60,7 +64,8 @@ export default function Auctions() {
           <p className="state">{t("auctions_empty")}</p>
         )}
 
-        {sortedDates.map((date) => {
+        {(() => {
+          const renderGroup = (date: string) => {
           const finished = date !== "unknown" && date < todayStr;
           const count = grouped[date].length;
           const header = (
@@ -120,7 +125,23 @@ export default function Auctions() {
               {list}
             </details>
           );
-        })}
+          };
+          return (
+            <>
+              {upcomingDates.map(renderGroup)}
+              {pastCount > 0 && (
+                <button
+                  type="button"
+                  className="btn btn-ghost auctions-toggle-past"
+                  onClick={() => setShowPast((v) => !v)}
+                >
+                  {showPast ? t("auctions_hide_past") : t("auctions_show_past", { n: pastCount })}
+                </button>
+              )}
+              {showPast && pastDates.map(renderGroup)}
+            </>
+          );
+        })()}
       </div>
     </div>
   );

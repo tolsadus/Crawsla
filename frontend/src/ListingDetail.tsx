@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
-import { fetchListing, fetchPhotos, fetchPriceHistory } from "./api";
+import { fetchListing, fetchPhotos, fetchPriceHistory, fetchVoteSummary, castVote, clearVote } from "./api";
+import type { VoteSummary, VoteValue } from "./api";
 import type { Listing, PricePoint } from "./types";
 import { getDrivetrain, DRIVETRAIN_LABEL, formatFuel, formatColor } from "./utils";
 import { useTranslation } from "./i18n";
+import { useAuth } from "./useAuth";
 
 function formatPrice(v: number | null): string {
   if (v === null) return "—";
@@ -152,21 +154,60 @@ function Carousel({ photos, fallback, photoAlt }: { photos: string[]; fallback: 
 
 export default function ListingDetail({ id, isSaved, onToggle }: { id: number; isSaved?: boolean; onToggle?: () => void }) {
   const { t, lang } = useTranslation();
+  const { user } = useAuth();
   const [listing, setListing] = useState<Listing | null>(null);
   const [history, setHistory] = useState<PricePoint[]>([]);
   const [photos, setPhotos] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [votes, setVotes] = useState<VoteSummary>({ up: 0, down: 0, mine: null });
+  const [voting, setVoting] = useState(false);
 
   useEffect(() => {
     setError(null);
-    Promise.all([fetchListing(id), fetchPriceHistory(id), fetchPhotos(id)])
-      .then(([l, h, p]) => {
+    Promise.all([fetchListing(id), fetchPriceHistory(id), fetchPhotos(id), fetchVoteSummary(id, user?.id ?? null)])
+      .then(([l, h, p, v]) => {
         setListing(l);
         setHistory(h);
         setPhotos(p);
+        setVotes(v);
       })
       .catch((e) => setError(e.message));
-  }, [id]);
+  }, [id, user?.id]);
+
+  async function handleVote(next: VoteValue) {
+    if (!user || voting) return;
+    setVoting(true);
+    const prev = votes;
+    const optimistic: VoteSummary = { ...prev };
+    if (prev.mine === next) {
+      optimistic.mine = null;
+      if (next === 1) optimistic.up = Math.max(0, prev.up - 1);
+      else optimistic.down = Math.max(0, prev.down - 1);
+    } else {
+      optimistic.mine = next;
+      if (next === 1) {
+        optimistic.up = prev.up + 1;
+        if (prev.mine === -1) optimistic.down = Math.max(0, prev.down - 1);
+      } else {
+        optimistic.down = prev.down + 1;
+        if (prev.mine === 1) optimistic.up = Math.max(0, prev.up - 1);
+      }
+    }
+    setVotes(optimistic);
+    try {
+      if (prev.mine === next) await clearVote(id, user.id);
+      else await castVote(id, user.id, next);
+      const fresh = await fetchVoteSummary(id, user.id);
+      setVotes(fresh);
+      const refreshed = await fetchListing(id);
+      setListing(refreshed);
+    } catch (e) {
+      setVotes(prev);
+      setError((e as Error).message);
+    } finally {
+      setVoting(false);
+    }
+  }
 
   if (error) return <p className="state error">Error: {error}</p>;
   if (!listing) return <span className="spinner" />;
@@ -206,6 +247,9 @@ export default function ListingDetail({ id, isSaved, onToggle }: { id: number; i
           </div>
           {listing.location && <p className="location">{listing.location}</p>}
           <p className="scraped-at">{t("card_crawled")} {formatDate(listing.scraped_at)}</p>
+          {listing.community_flagged_at && (
+            <p className="community-flagged-banner">⚠️ {t("vote_flagged")}</p>
+          )}
           <div className="cta-row">
             <a className="btn btn-primary" href={listing.url} target="_blank" rel="noreferrer">{t("detail_view_on")} {listing.source}</a>
             {onToggle && (
@@ -213,6 +257,27 @@ export default function ListingDetail({ id, isSaved, onToggle }: { id: number; i
                 {isSaved ? `✕ ${t("detail_remove")}` : `🔖 ${t("detail_save")}`}
               </button>
             )}
+          </div>
+          <div className="vote-row">
+            <button
+              type="button"
+              className={`vote-btn vote-up${votes.mine === 1 ? " active" : ""}`}
+              onClick={() => handleVote(1)}
+              disabled={!user || voting}
+              title={!user ? t("vote_signin") : t("vote_alive")}
+            >
+              👍 <span className="vote-count">{votes.up}</span>
+            </button>
+            <button
+              type="button"
+              className={`vote-btn vote-down${votes.mine === -1 ? " active" : ""}`}
+              onClick={() => handleVote(-1)}
+              disabled={!user || voting}
+              title={!user ? t("vote_signin") : t("vote_offline")}
+            >
+              👎 <span className="vote-count">{votes.down}</span>
+            </button>
+            {!user && <span className="vote-hint">{t("vote_signin")}</span>}
           </div>
         </div>
       </div>
